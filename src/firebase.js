@@ -2,17 +2,18 @@ import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 
-const config = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+const firebaseConfig = {
+  apiKey: "AIzaSyB41_nCU1ZSx7oNV6JJiGVZRuTkCAr3aIY",
+  authDomain: "album-app-74405.firebaseapp.com",
+  databaseURL: "https://album-app-74405.firebaseio.com",
+  projectId: "album-app-74405",
+  storageBucket: "album-app-74405.appspot.com",
+  messagingSenderId: "710328217185",
+  appId: "1:710328217185:web:ad5e6288c0f2cc82404420",
+  measurementId: "G-1BB6171VNE"
 };
 
-firebase.initializeApp(config);
+firebase.initializeApp(firebaseConfig);
 
 export const auth = firebase.auth();
 
