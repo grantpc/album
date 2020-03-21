@@ -14,11 +14,18 @@ import {
   Typography
 } from "@material-ui/core";
 import { Link, Route } from "react-router-dom";
-import { auth } from "./firebase";
+import { auth, db, snapshotToArray } from "./firebase";
+import Photos from "./Photos";
+import AddAlbum from "./AddAlbum";
 
 export function App(props) {
   const [drawer_open, setDrawerOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [dialog, setDialog] = useState(false);
+  const [albums, setAlbums] = useState([
+    { id: 0, title: "Nature" },
+    { id: 1, title: "Cities" }
+  ]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(u => {
@@ -31,6 +38,18 @@ export function App(props) {
 
     return unsubscribe;
   }, [props.history]);
+
+  useEffect(() => {
+    if (user) {
+      db.collection("users")
+        .doc(user.uid)
+        .collection("albums")
+        .onSnapshot(snapshot => {
+          const updatedAlbums = snapshotToArray(snapshot);
+          setAlbums(updatedAlbums);
+        });
+    }
+  }, [user]);
 
   const handleSignOut = () => {
     auth
@@ -64,7 +83,7 @@ export function App(props) {
             color="inherit"
             style={{ flexGrow: 1, marginLeft: "30px" }}
           >
-            My App
+            My Album App
           </Typography>
           <Typography color="inherit" style={{ marginRight: "30px" }}>
             Hi! {user.email}
@@ -81,11 +100,66 @@ export function App(props) {
         }}
       >
         <List>
-          <ListItem button>
+          <ListItem
+            button
+            to="/app"
+            component={Link}
+            onClick={() => {
+              setDrawerOpen(false);
+            }}
+          >
             <ListItemText primary="Home" />
+          </ListItem>
+          <ListItem
+            button
+            to="/app/public"
+            component={Link}
+            onClick={() => {
+              setDrawerOpen(false);
+            }}
+          >
+            <ListItemText primary="Public Feed" />
+          </ListItem>
+          {albums.map(a => {
+            return (
+              <ListItem
+                button
+                to={"/app/album/" + a.id + "/"}
+                component={Link}
+                onClick={() => {
+                  setDrawerOpen(false);
+                }}
+              >
+                <ListItemText primary={a.name} />
+              </ListItem>
+            );
+          })}
+
+          <ListItem
+            button
+            onClick={() => {
+              setDialog(true);
+            }}
+          >
+            <ListItemText primary="Create New Album" />
           </ListItem>
         </List>
       </Drawer>
+      <Route
+        path="/app/album/:album_id/"
+        render={routeProps => {
+          return <Photos user={user} {...routeProps} />;
+        }}
+      />
+      <AddAlbum
+        open={dialog}
+        onClose={() => {
+          setDialog(false);
+          setDrawerOpen(false);
+        }}
+        user={user}
+      />
+      Hello world
     </div>
   );
 }
